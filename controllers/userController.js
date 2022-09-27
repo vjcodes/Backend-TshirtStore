@@ -4,6 +4,7 @@ const CustomError = require('../utils/customError');
 const cookieToken = require('../utils/cookieToken');
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary');
+const mailHelper = require('../utils/emailHelper');
 
 exports.signup = BigPromise(async (req, res, next) => {
 
@@ -82,4 +83,43 @@ exports.logout = BigPromise(async (req,res,next) => {
         success: true,
         message: "Logout success"
     })
+})
+
+exports.forgotPassword = BigPromise(async (req,res,next) => {
+    const {email} = req.body
+
+    const user = await User.findOne({email})
+
+    if(!user){
+        return next(new CustomError('Email not found as registered', 400))
+    }
+
+    const forgotToken = user.getForgotPasswordToken()
+
+    await user.save({validateBeforSave: false})
+
+    const myUrl = `${req.protocol}://${req.get("host")}/password/reset/${forgotToken}`
+
+    const message = `Copy paste this link in your URL and hit enter \n\n ${myUrl} `
+
+    try {
+        const option = {
+            email: user.email,
+            subject: "LCO TStore - Password reset email",
+            message
+        }
+        await mailHelper(option)
+
+        res.status(200).json({
+            success: true,
+            message: "email sent successfully"
+        })
+        
+    } catch (error) {
+        user.forgotPasswordToken = undefined
+        user.forgotPasswordExpiry = undefined
+        await user.save({validateBeforeSave: false})
+
+        return next(new CustomError(error.message, 500))
+    }
 })
