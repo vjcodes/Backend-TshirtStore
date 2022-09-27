@@ -3,7 +3,7 @@ const BigPromise = require("../middlewares/bigPromise");
 const CustomError = require('../utils/customError');
 const cookieToken = require('../utils/cookieToken');
 const fileUpload = require('express-fileupload')
-const cloudinary = require('cloudinary')
+const cloudinary = require('cloudinary');
 
 exports.signup = BigPromise(async (req, res, next) => {
 
@@ -43,3 +43,31 @@ exports.signup = BigPromise(async (req, res, next) => {
     cookieToken(user, res)
 
 });
+
+exports.login = BigPromise(async (req,res,next) => {
+    const {email, password} = req.body
+
+    //check for presence of email and password
+    if(!email || !password){
+        return next(new CustomError("Please provide and email", 400))
+    }
+
+    // get user from db
+    const user = await User.findOne({email}).select("+password")
+
+    // if user not found in db
+    if(!user) {
+        return next(new CustomError('Email or Password does not match or exist', 400))
+    }
+
+    // match the password
+    const isPasswordCorrect = await user.isValidatedPassword(password)
+
+    // if password do not match
+    if(!isPasswordCorrect) {
+        return next(new CustomError('Email or Password does not match or exist', 400))
+    }
+
+    // if all goes good and we send the token
+    cookieToken(user, res);
+})
