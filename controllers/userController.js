@@ -4,6 +4,8 @@ const CustomError = require('../utils/customError');
 const cookieToken = require('../utils/cookieToken');
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary')
+const fileUpload = require('express-fileupload')
+const cloudinary = require('cloudinary')
 
 exports.signup = BigPromise(async (req, res, next) => {
 
@@ -34,6 +36,10 @@ exports.signup = BigPromise(async (req, res, next) => {
         name,
         email,
         password,
+        photo: {
+            id: result.public_id,
+            secure_url: result.secure_url
+        },
         photo: {
             id: result.public_id,
             secure_url: result.secure_url
