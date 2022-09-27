@@ -4,8 +4,6 @@ const CustomError = require('../utils/customError');
 const cookieToken = require('../utils/cookieToken');
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary')
-const fileUpload = require('express-fileupload')
-const cloudinary = require('cloudinary')
 
 exports.signup = BigPromise(async (req, res, next) => {
 
