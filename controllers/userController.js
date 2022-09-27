@@ -4,20 +4,16 @@ const CustomError = require('../utils/customError');
 const cookieToken = require('../utils/cookieToken');
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary')
+const fileUpload = require('express-fileupload')
+const cloudinary = require('cloudinary')
 
 exports.signup = BigPromise(async (req, res, next) => {
 
-    let result;
+    // let result;
 
-    if(req.files) {
-        let file = req.files.photo
-        result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
-            folder: "users",
-            width: 150,
-            crop: "scale"
-        })
+    if(!req.files) {
+        return next(new CustomError("photo is required for signup", 400))
     }
-
 
     const {name, email, password} = req.body
 
@@ -28,10 +24,22 @@ exports.signup = BigPromise(async (req, res, next) => {
         // return next(new Error("please send email"))
     }
 
+    let file = req.files.photo;
+
+    const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+        folder: "users",
+        width: 150,
+        crop: "scale"
+    })
+
     const user = await User.create({
         name,
         email,
         password,
+        photo: {
+            id: result.public_id,
+            secure_url: result.secure_url
+        },
         photo: {
             id: result.public_id,
             secure_url: result.secure_url
