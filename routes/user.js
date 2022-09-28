@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, login, logout, forgotPassword, passwordReset, getLoggedInUserDetails, changePassword, updateUserDetails, adminAllUsers } = require('../controllers/userController');
+const { signup, login, logout, forgotPassword, passwordReset, getLoggedInUserDetails, changePassword, updateUserDetails, adminAllUsers, managerAllUser } = require('../controllers/userController');
 const router = express.Router()
 const { isLoggedIn, customRole } = require("../middlewares/user")
 
@@ -12,7 +12,10 @@ router.route("/userdashboard").get(isLoggedIn, getLoggedInUserDetails)
 router.route("/password/update").post(isLoggedIn, changePassword)
 router.route("/userdashboard/update").post(isLoggedIn, updateUserDetails)
 
-
+//admin only routes
 router.route("/admin/users").get(isLoggedIn, customRole('admin'), adminAllUsers)
+
+//manager only route
+router.route("/manager/users").get(isLoggedIn, customRole('manager'), managerAllUser)
 
 module.exports = router;
