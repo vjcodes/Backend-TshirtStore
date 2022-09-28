@@ -135,7 +135,7 @@ exports.passwordReset = BigPromise(async (req,res,next) => {
 
     const user = await User.findOne({
         encryToken,
-        forgotPasswordExpiry: {$gt: Date.now()}
+        forgotPasswordExpiry: {$gt: Date.now()} // checking for if expiry date is greater(gt) of Date.now()
     })
 
     if(!user){
