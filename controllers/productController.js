@@ -88,6 +88,7 @@ exports.getOneProduct = BigPromise(async(req, res, next) => {
 
 });
 
+
 // admin only controllers...
 
 exports.adminGetAllProducts = BigPromise(async(req, res, next) => {
@@ -98,7 +99,6 @@ exports.adminGetAllProducts = BigPromise(async(req, res, next) => {
         success: true,
         products
     })
-
 });
 
 exports.adminUpdateOneProduct = BigPromise(async(req, res, next) => {
@@ -168,5 +168,4 @@ exports.adminDeleteOneProduct = BigPromise(async(req, res, next) => {
         success: true,
         message: "Product was deleted"
     })
-
 });
