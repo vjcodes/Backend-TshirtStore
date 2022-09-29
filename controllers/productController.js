@@ -88,6 +88,9 @@ exports.getOneProduct = BigPromise(async(req, res, next) => {
 
 });
 
+
+// admin only controllers...
+
 exports.adminGetAllProducts = BigPromise(async(req, res, next) => {
    
     const products = await Product.find()
@@ -96,5 +99,73 @@ exports.adminGetAllProducts = BigPromise(async(req, res, next) => {
         success: true,
         products
     })
+});
 
+exports.adminUpdateOneProduct = BigPromise(async(req, res, next) => {
+   
+    let product = await Product.findById(req.params.id)
+
+    if(!product){
+        return next(new CustomError('No Product found with this id', 401))
+    }
+
+    let imagesArray = []
+
+    if(req.files){
+
+        //destroy the existing images
+        for (let index = 0; index < product.photos.length; index++) {
+            const res = await cloudinary.v2.uploader.destroy(product.photos[index].id)
+        }
+
+        //upload and save the images
+        for (let index = 0; index < req.files.photos.length; index++) {
+            let result = await cloudinary.v2.uploader.upload(req.files.photos[index].
+                tempFilePath, {
+                    folder: "products" //folder name -> .env
+                })
+            
+            imagesArray.push({
+                id: result.public_id,
+                secure_url: result.secure_url
+            })
+            
+        }
+        
+    }
+
+    req.body.photos = imagesArray
+
+    product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false // in modern mongoose its already default
+    })
+    
+    res.status(200).json({
+        success: true,
+        product
+    })
+
+});
+
+exports.adminDeleteOneProduct = BigPromise(async(req, res, next) => {
+   
+    const product = await Product.findById(req.params.id)
+
+    if(!product){
+        return next(new CustomError('No Product found with this id', 401))
+    }
+
+    //destroy the existing images
+    for (let index = 0; index < product.photos.length; index++) {
+       await cloudinary.v2.uploader.destroy(product.photos[index].id)
+    }
+
+    await product.remove()
+    
+    res.status(200).json({
+        success: true,
+        message: "Product was deleted"
+    })
 });

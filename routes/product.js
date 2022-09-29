@@ -1,5 +1,6 @@
 const express = require('express');
-const { testProduct, getAllProducts, addProduct, adminGetAllProducts, getOneProduct } = require('../controllers/productController');
+const { testProduct, getAllProducts, addProduct, adminGetAllProducts, getOneProduct, adminUpdateOneProduct, adminDeleteOneProduct } = require('../controllers/productController');
+
 const router = express.Router()
 const { isLoggedIn, customRole } = require("../middlewares/user")
 
@@ -15,6 +16,9 @@ router.route('/product/:id').get(getOneProduct)
 //admin routes
 router.route('/admin/product/add').post(isLoggedIn, customRole('admin'), addProduct)
 router.route('/admin/products').get(isLoggedIn, customRole('admin'), adminGetAllProducts)
+router.route('/admin/product/:id')
+    .put(isLoggedIn, customRole('admin'), adminUpdateOneProduct)
+    .delete(isLoggedIn, customRole('admin'), adminDeleteOneProduct)
 
 
 module.exports = router
