@@ -115,7 +115,7 @@ exports.addReview = BigPromise(async(req, res, next) => {
 
     }else{
         product.reviews.push(review)
-        product.numberOfReviews = product.reviews.length
+        product.numOfReviews = product.reviews.length
     }
 
     //adjust ratings
@@ -137,7 +137,7 @@ exports.deleteReview = BigPromise(async(req, res, next) => {
     const product = await Product.findById(productId)
 
     const reviews = product.reviews.filter(
-        (review) => review.user.toString() === req.user._id.toString()
+        (review) => review.user.toString() !== req.user._id.toString()
     )
 
     const alreadyReviewed = product.reviews.find(
@@ -147,13 +147,13 @@ exports.deleteReview = BigPromise(async(req, res, next) => {
     const numberOfReviews = reviews.length
 
     //adjust ratings
-    product.ratings = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length
+    product.ratings = reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length
 
     //update the product
     await Product.findByIdAndUpdate(productId, {
         reviews,
-        ratings,
-        numberOfReviews
+        ratings: product.ratings,
+        numOfReviews: numberOfReviews
     }, {
         new: true,
         runValidators: true,
@@ -167,7 +167,7 @@ exports.deleteReview = BigPromise(async(req, res, next) => {
 });
 
 exports.getOnlyReviewsForOneProduct = BigPromise(async (req, res, next) => {
-    const product = await Product.findById(req.query.id)
+    const product = await Product.findById(req.query.productId)
 
     res.status(200).json({
         success: true,
