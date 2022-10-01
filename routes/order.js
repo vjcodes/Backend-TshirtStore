@@ -1,5 +1,5 @@
 const express = require('express');
-const { createOrder, getOneOrder, getLoggedInOrders, adminGetAllOrders, adminUpdateOrder } = require('../controllers/orderController');
+const { createOrder, getOneOrder, getLoggedInOrders, adminGetAllOrders, adminUpdateOrder, adminDeleteOrder } = require('../controllers/orderController');
 const router = express.Router()
 const { isLoggedIn, customRole } = require("../middlewares/user")
 
@@ -9,6 +9,8 @@ router.route("/myorder").get(isLoggedIn, getLoggedInOrders);
 
 
 router.route("/admin/orders").get(isLoggedIn, customRole('admin'), adminGetAllOrders);
-router.route("/admin/order/:id").put(isLoggedIn, customRole('admin'), adminUpdateOrder )
+router.route("/admin/order/:id")
+    .put(isLoggedIn, customRole('admin'), adminUpdateOrder )
+    .delete(isLoggedIn, customRole('admin'), adminDeleteOrder);
 
 module.exports = router
